@@ -1,59 +1,59 @@
 import math
 from distances import distances
 
-class SolucionadorTSP:
-    def __init__(self, coordenadas):
-        self.coordenadas = coordenadas
+class TSPSolver:
+    def __init__(self, coordinates):
+        self.coordinates = coordinates
     
-    def resolver(self, num_caixeiros, max_cidades_por_caixeiro):
-        caminhos = [[] for _ in range(num_caixeiros)]
-        cidades_nao_visitadas = set(range(1, len(self.coordenadas)))
+    def solve(self, num_salesmen, max_cities_per_salesman):
+        paths = [[] for _ in range(num_salesmen)]
+        unvisited_cities = set(range(1, len(self.coordinates)))
         
-        for caixeiro in range(num_caixeiros):
-            caminho = caminhos[caixeiro]
-            cidade_atual = 0
-            caminho.append(cidade_atual)
+        for salesman in range(num_salesmen):
+            path = paths[salesman]
+            current_city = 0
+            path.append(current_city)
             
-            while len(caminho) < max_cidades_por_caixeiro and cidades_nao_visitadas:
-                cidade_mais_proxima = min(cidades_nao_visitadas, key=lambda cidade: self._distancia(cidade_atual, cidade))
-                caminho.append(cidade_mais_proxima)
-                cidades_nao_visitadas.remove(cidade_mais_proxima)
-                cidade_atual = cidade_mais_proxima
+            while len(path) < max_cities_per_salesman and unvisited_cities:
+                nearest_city = min(unvisited_cities, key=lambda city: self._distance(current_city, city))
+                path.append(nearest_city)
+                unvisited_cities.remove(nearest_city)
+                current_city = nearest_city
             
-            caminho.append(0)
+            path.append(0)
         
-        cidades_restantes = set(range(1, len(self.coordenadas))) - set(cidade for caminho in caminhos for cidade in caminho)
+        remaining_cities = set(range(1, len(self.coordinates))) - set(city for path in paths for city in path)
         
-        for cidade_restante in cidades_restantes:
-            caminho_mais_proximo = min(caminhos, key=lambda caminho: self._calcular_custo_insercao(cidade_restante, caminho))
-            indice_minimo = min(range(1, len(caminho_mais_proximo)), key=lambda i: self._calcular_custo_insercao_em_posicao(cidade_restante, caminho_mais_proximo, i))
-            caminho_mais_proximo.insert(indice_minimo, cidade_restante)
+        for remaining_city in remaining_cities:
+            closest_path = min(paths, key=lambda path: self._calculate_insertion_cost(remaining_city, path))
+            min_index = min(range(1, len(closest_path)), key=lambda i: self._calculate_insertion_cost_at_position(remaining_city, closest_path, i))
+            closest_path.insert(min_index, remaining_city)
         
-        return caminhos 
+        return paths 
     
-    def _distancia(self, cidade1, cidade2):
-        return math.dist(self.coordenadas[cidade1], self.coordenadas[cidade2])
+    def _distance(self, city1, city2):
+        return math.dist(self.coordinates[city1], self.coordinates[city2])
     
-    def _calcular_custo_insercao(self, cidade, caminho):
-        return min(self._calcular_custo_insercao_em_posicao(cidade, caminho, i) for i in range(1, len(caminho)))
+    def _calculate_insertion_cost(self, city, path):
+        return min(self._calculate_insertion_cost_at_position(city, path, i) for i in range(1, len(path)))
     
-    def _calcular_custo_insercao_em_posicao(self, cidade, caminho, indice):
-        if indice == len(caminho):
-            return self._distancia(caminho[-1], cidade) + self._distancia(cidade, caminho[0]) - self._distancia(caminho[-1], caminho[0])
+    def _calculate_insertion_cost_at_position(self, city, path, index):
+        if index == len(path):
+            return self._distance(path[-1], city) + self._distance(city, path[0]) - self._distance(path[-1], path[0])
         else:
-            return self._distancia(caminho[indice-1], cidade) + self._distancia(cidade, caminho[indice]) - self._distancia(caminho[indice-1], caminho[indice])
+            return self._distance(path[index-1], city) + self._distance(city, path[index]) - self._distance(path[index-1], path[index])
 
-num_caixeiros = 5
-max_cidades_por_caixeiro = 19
+num_salesmen = 5
+max_cities_per_salesman = 19
 
-matriz_selecionada = "Matriz9"
-coordenadas = distances[matriz_selecionada]
+selected_matrix = "Matrix9"
+coordinates = distances[selected_matrix]
 
-solucionador = SolucionadorTSP(coordenadas)
-caminhos = solucionador.resolver(num_caixeiros, max_cidades_por_caixeiro)
+solver = TSPSolver(coordinates)
+paths = solver.solve(num_salesmen, max_cities_per_salesman)
 
-for i, caminho in enumerate(caminhos):
-    print(f"Caixeiro {i+1}: {caminho}")
+for i, path in enumerate(paths):
+    print(f"Salesman {i+1}: {path}")
 
-distancia_total = round(sum(sum(solucionador._distancia(caminho[i], caminho[i+1]) for i in range(len(caminho) - 1)) for caminho in caminhos))
-print(f"Distância total percorrida: {distancia_total}")
+total_distance = round(sum(sum(solver._distance(path[i], path[i+1]) for i in range(len(path) - 1)) for path in paths))
+print(f"Total distance traveled: {total_distance}")
